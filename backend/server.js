@@ -2,10 +2,20 @@ const express = require("express");
 const dotenv = require("dotenv");
 dotenv.config({ path: './backend/.env' });
 const { connectDB } = require("./config/db");
+const userRoutes=require("../backend/routes/userRoutes")
 const app = express();
 
 // MongoDB connection
 connectDB();
+
+//middle wares
+
+app.use(express.urlencoded({extended: false}));
+app.use(express.json());
+
+
+//adding routes 
+app.use("/api/users",userRoutes)
 
 // Server listening on port 3000
 app.listen(process.env.PORT, () => {
