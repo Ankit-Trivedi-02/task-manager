@@ -4,6 +4,7 @@ dotenv.config({ path: './backend/.env' });
 const { connectDB } = require("./config/db");
 const userRoutes=require("../backend/routes/userRoutes")
 const app = express();
+const cookieParser = require('cookie-parser');
 
 // MongoDB connection
 connectDB();
@@ -12,6 +13,7 @@ connectDB();
 
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
+app.use(cookieParser());
 
 
 //adding routes 

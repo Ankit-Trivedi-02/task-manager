@@ -1,4 +1,10 @@
 const user = require("../models/User")
+const{setUser}=require("../utils/userUtils")
+
+async function allUser(req,res) {
+  res.json({message:`${req.user.email} you are at user page`});
+}
+
 
 async function registerUser(req, res) {
   if (!(req.body)) return res.json({ error: "All fields are required! " });
@@ -35,16 +41,25 @@ async function loginUser(req, res) {
     return res.status(400).json({ error: "Both email and password are required" })
   }
   try {
-    const loginUser = await user.findOne({ email });
+    const User = await user.findOne({ email });
 
-    if (!loginUser) {
+    if (!User) {
       return res.status(400).json({ error: "Invalid credentials!" })
     }
-    const isMatch = await loginUser.matchPassword(password);
+    const isMatch = await User.matchPassword(password);
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid credentials!" })
     }
-    return res.status(200).json({ success: "You are at home page" });
+
+    const token = setUser({ _id: User._id, email: User.email });
+    return res
+  .cookie("uid", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  })
+  .status(200)
+  .json({ success: "You are at home page" })
   }
   catch (err) {
     return res.status(500).json({ error: "Server error" });
@@ -54,4 +69,4 @@ async function loginUser(req, res) {
 
 
 
-module.exports = { registerUser, loginUser };
+module.exports = {allUser, registerUser, loginUser };
