@@ -1,4 +1,5 @@
 const task = require("../models/Task");
+const { findOne } = require("../models/User");
 //const { findOne, findOneAndDelete, findOneAndUpdate } = require("../models/User");
 
 async function allTask(req, res) {
@@ -62,5 +63,16 @@ async function deleteTask(req, res) {
     }
 }
 
+async function getTaskById(req, res) {
+    const id = req.params.id;
+    try {
+        const findingTask = await task.findOne({ user: req.user._id, _id: id })
+        
+        res.status(200).json({findingTask});
+    }
+    catch (err) {
+        res.status(500).json({ error: "Error to find task" })
+    }
+}
 
-module.exports = { updateTask, deleteTask, allTask, registerTask };
+module.exports = { getTaskById, updateTask, deleteTask, allTask, registerTask };
