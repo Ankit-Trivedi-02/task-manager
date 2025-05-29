@@ -1,14 +1,38 @@
 const task = require("../models/Task");
-const { findOne } = require("../models/User");
+const { findOne, find } = require("../models/User");
 //const { findOne, findOneAndDelete, findOneAndUpdate } = require("../models/User");
 
 async function allTask(req, res) {
+    let filter = { user: req.user._id };  // Start with filtering tasks by logged-in user
+    let sort = {};                        // Initialize empty sort object
+
     try {
-        const tasks = await task.find({ user: req.user._id })
-        res.status(200).json({ tasks });
-    }
-    catch (err) {
-        res.json({ error: "error finding in database" })
+        // 1️⃣ Check if the 'completed' query parameter is provided
+        if (req.query.completed !== undefined) {
+            // Convert the string 'true' or 'false' to a boolean
+            filter.completed = req.query.completed === 'true';
+        }
+
+        // 2️⃣ Check if the 'sortBy' query parameter exists
+        if (req.query.sortBy) {
+            const parts = req.query.sortBy.split(':'); // Split string by ':' (e.g. "createdAt:desc")
+
+            const field = parts[0];                    // Extract field to sort by (e.g. "createdAt")
+
+            // Determine sorting order: -1 for desc, 1 for asc (default)
+            const order = parts[1] === 'desc' ? -1 : 1;
+
+            sort[field] = order;                       // Dynamically set sort order for the field
+        }
+        // 3️⃣ Query tasks matching the filter, and apply sorting
+        const tasks = await task.find(filter).sort(sort);
+
+        // 4️⃣ Send back the fetched tasks as JSON response
+        res.status(200).json(tasks);
+    } catch (err) {
+        // If any error occurs, send 500 status with error message
+        console.error("Server Error:", err);
+        res.status(500).json({ err: "Error fetching your data" });
     }
 }
 
@@ -67,8 +91,8 @@ async function getTaskById(req, res) {
     const id = req.params.id;
     try {
         const findingTask = await task.findOne({ user: req.user._id, _id: id })
-        
-        res.status(200).json({findingTask});
+
+        res.status(200).json({ findingTask });
     }
     catch (err) {
         res.status(500).json({ error: "Error to find task" })
