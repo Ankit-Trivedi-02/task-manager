@@ -1,8 +1,8 @@
 const user = require("../models/User")
-const{setUser}=require("../utils/userUtils")
+const { setUser } = require("../utils/userUtils")
 
-async function allUser(req,res) {
-  res.json({message:`${req.user.email} you are at user page`});
+async function allUser(req, res) {
+  res.json({ message: `${req.user.email} you are at user page` });
 }
 
 
@@ -53,13 +53,14 @@ async function loginUser(req, res) {
 
     const token = setUser({ _id: User._id, email: User.email });
     return res
-  .cookie("uid", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-  })
-  .status(200)
-  .json({ success: "You are at home page" })
+      .cookie("uid", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+      })
+      .status(200)
+      .json({ success: "You are at home page" })
   }
   catch (err) {
     return res.status(500).json({ error: "Server error" });
@@ -67,6 +68,20 @@ async function loginUser(req, res) {
 
 }
 
+async function logoutUser(req, res) {
+  try {
+    res.clearCookie("uid", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/", // important: match how the cookie was originally set
+    });
+
+    return res.status(200).json({ message: "Logged out successfully" });
+  } catch (err) {
+    return res.status(500).json({ error: "Error logging out" });
+  }
+}
 
 
-module.exports = {allUser, registerUser, loginUser };
+module.exports = { allUser, registerUser, loginUser, logoutUser };
