@@ -17,14 +17,15 @@ async function allTask(req, res) {
         if (req.query.sortBy) {
             const parts = req.query.sortBy.split(':'); // Split string by ':' (e.g. "createdAt:desc")
 
-            const field = parts[0];                    // Extract field to sort by (e.g. "createdAt")
+            const field = parts[0];                    // Extract field to sort by (e.g. "createdAt/due date")
 
             // Determine sorting order: -1 for desc, 1 for asc (default)
-            const order = parts[1] === 'desc' ? -1 : 1;
-
+            let order = parts[1] === 'desc' ? -1 : 1;
+            if (field === `priority`) { order = 1 };
             sort[field] = order;                       // Dynamically set sort order for the field
         }
         // 3️⃣ Query tasks matching the filter, and apply sorting
+        console.log(sort);
         const tasks = await task.find(filter).sort(sort);
 
         // 4️⃣ Send back the fetched tasks as JSON response
@@ -41,12 +42,12 @@ async function registerTask(req, res) {
     if (!req.body) {
         return res.status(401).json({ error: "Must provide required data" });
     }
-    const { title, description, dueDate } = req.body;
+    const { title, description, dueDate, priority } = req.body;
     if (!title) {
         return res.status(401).json({ error: "Must provide required data" });
     }
     try {
-        const registeredTask = await task.create({ title, description, user: req.user._id, dueDate });
+        const registeredTask = await task.create({ title, description, user: req.user._id, dueDate, priority });
         res.status(201).json({ sucess: "Your task is registered", title: title, description: description })
     }
     catch (err) {
