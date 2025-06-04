@@ -20,12 +20,19 @@ async function allTask(req, res) {
             const field = parts[0];                    // Extract field to sort by (e.g. "createdAt/due date")
 
             // Determine sorting order: -1 for desc, 1 for asc (default)
-            let order = parts[1] === 'desc' ? -1 : 1;
-            if (field === `priority`) { order = 1 };
+            const order = parts[1] === 'desc' ? -1 : 1;
             sort[field] = order;                       // Dynamically set sort order for the field
         }
         // 3️⃣ Query tasks matching the filter, and apply sorting
-        console.log(sort);
+        if (req.query.start || req.query.end) {
+            filter.dueDate = {};
+            if (req.query.start) {
+                filter.dueDate.$gte = new Date(req.query.start);
+            }
+            if (req.query.end) {
+                filter.dueDate.$lte = new Date(req.query.end);
+            }
+        }
         const tasks = await task.find(filter).sort(sort);
 
         // 4️⃣ Send back the fetched tasks as JSON response
