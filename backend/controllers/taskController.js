@@ -41,12 +41,12 @@ async function registerTask(req, res) {
     if (!req.body) {
         return res.status(401).json({ error: "Must provide required data" });
     }
-    const { title, description } = req.body;
+    const { title, description, dueDate } = req.body;
     if (!title) {
         return res.status(401).json({ error: "Must provide required data" });
     }
     try {
-        const registeredTask = await task.create({ title, description, user: req.user._id });
+        const registeredTask = await task.create({ title, description, user: req.user._id, dueDate });
         res.status(201).json({ sucess: "Your task is registered", title: title, description: description })
     }
     catch (err) {

@@ -7,6 +7,7 @@ const taskSchema = new mongoose.Schema(
         description: { type: String },
         completed: { type: Boolean, default: false },
         user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        dueDate: {type: Date, default: "2025-06-10T23:59:59.000Z"}
     },
     { timestamps: true }  // ✅ Enable createdAt and updatedAt
 )
