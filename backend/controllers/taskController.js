@@ -33,6 +33,10 @@ async function allTask(req, res) {
                 filter.dueDate.$lte = new Date(req.query.end);
             }
         }
+        if (req.query.search) {
+            const search = req.query.search;
+            filter.title = { $regex: search, $options: "i" };
+        }
         const tasks = await task.find(filter).sort(sort);
 
         // 4️⃣ Send back the fetched tasks as JSON response
