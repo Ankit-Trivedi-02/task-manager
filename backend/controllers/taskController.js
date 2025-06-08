@@ -7,6 +7,10 @@ async function allTask(req, res) {
     let sort = {};                        // Initialize empty sort object
 
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const skip = (page - 1) * (limit);
         // 1️⃣ Check if the 'completed' query parameter is provided
         if (req.query.completed !== undefined) {
             // Convert the string 'true' or 'false' to a boolean
@@ -37,10 +41,18 @@ async function allTask(req, res) {
             const search = req.query.search;
             filter.title = { $regex: search, $options: "i" };
         }
-        const tasks = await task.find(filter).sort(sort);
-
+        const tasks = await task.find(filter).sort(sort).skip(skip).limit(limit);
+        const total = await task.countDocuments(filter);
+        
         // 4️⃣ Send back the fetched tasks as JSON response
-        res.status(200).json(tasks);
+        res.status(200).json({
+            success: true,
+            page,
+            limit,
+            totalTasks: total,
+            totalPages: Math.ceil(total / limit),
+            tasks,
+        });
     } catch (err) {
         // If any error occurs, send 500 status with error message
         console.error("Server Error:", err);
