@@ -66,14 +66,13 @@ async function updateTask(req, res) {
     if (!req.body || typeof req.body.completed !== 'boolean') {
         return res.status(400).json({ error: "'completed' must be provided and must be boolean" });
     }
-    const { completed } = req.body;
+    const { title, description, completed, priority, dueDate } = req.body;
     console.log(completed);
     const id = req.params.id;
     try {
-        console.log(req.user._id, id, completed);
         const updatableTask = await task.findOneAndUpdate(
             { _id: req.params.id, user: req.user._id },
-            { completed },
+            { title, description, completed, priority, dueDate },
             { new: true });
         console.log(updatableTask);
         res.status(200).json({ updatableTask });
